@@ -1,11 +1,12 @@
 <template>
   <div>
-    <!-- <BookList /> -->
-    <BooksTable/>
-
+    <BooksTableT/>
+    <!-- <BooksTable/>  -->
   </div>
 </template>
 
 <script setup lang="ts">
-import BooksTable from '@/components/BooksTable.vue';
+import BooksTableT from '@/components/BookTableT.vue';
+// import BooksTable from '@/components/BooksTable.vue';
+
 </script>

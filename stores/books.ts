@@ -15,7 +15,7 @@ export const useBooksStore = defineStore('books', {
       this.error = null;
     
       try {
-        const response = await fetch(`http://localhost:3005/api/books?page=${page}&page_size=${pageSize}`);
+        const response = await fetch(`http://localhost:3001/api/books?page=${page}&page_size=${pageSize}`);
         const data = await response.json();
     
         // Map API response to include an `image` key
@@ -45,7 +45,7 @@ export const useBooksStore = defineStore('books', {
 
       try {
         console.log("osama")
-        const response = await fetch(`http://localhost:3005/api/books/${bookId}`, {
+        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
           method: 'DELETE',
         });
 
@@ -64,7 +64,7 @@ export const useBooksStore = defineStore('books', {
     },
     async updateBook(bookId: number, updatedData: any) {
       try {
-        const response = await fetch(`http://localhost:3005/api/books/${bookId}`, {
+        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ export const useBooksStore = defineStore('books', {
     async addBook(newBook:any) {
       try {
         console.log(newBook)
-        const response = await fetch('http://localhost:3005/api/books', {
+        const response = await fetch('http://localhost:3001/api/books', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
