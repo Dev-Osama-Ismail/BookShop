@@ -6,6 +6,7 @@ export const useBooksStore = defineStore('books', {
     currentPage: 1, // Track the current page
     loading: false,
     error: null as string | null,
+    apiServer:"http://localhost:3005/api/"
   }),
   actions: {
     async fetchBooks(page: number, pageSize: number) {
@@ -15,7 +16,10 @@ export const useBooksStore = defineStore('books', {
       this.error = null;
     
       try {
-        const response = await fetch(`http://localhost:3001/api/books?page=${page}&page_size=${pageSize}`);
+        const router = useRouter();
+        router.push({ query: { page: page, page_size: pageSize.toString() } });
+
+        const response = await fetch(`${this.apiServer}books?page=${page}&page_size=${pageSize}`);
         const data = await response.json();
     
         // Map API response to include an `image` key
@@ -45,7 +49,7 @@ export const useBooksStore = defineStore('books', {
 
       try {
         console.log("osama")
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+        const response = await fetch(`${this.apiServer}books/${bookId}`, {
           method: 'DELETE',
         });
 
@@ -64,7 +68,7 @@ export const useBooksStore = defineStore('books', {
     },
     async updateBook(bookId: number, updatedData: any) {
       try {
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+        const response = await fetch(`${this.apiServer}books/${bookId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -92,7 +96,7 @@ export const useBooksStore = defineStore('books', {
     async addBook(newBook:any) {
       try {
         console.log(newBook)
-        const response = await fetch('http://localhost:3001/api/books', {
+        const response = await fetch(`${this.apiServer}books`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +128,12 @@ export const useBooksStore = defineStore('books', {
     getCachedPage(page: number) {
       return this.pages[page] || []; // Return cached data or an empty array if not available
     },
-    
+    getFilteredBooks(page: number, query: string) {
+      const allBooks = Object.values(this.pages).flat();
+      return allBooks.filter((book) =>
+        book.title.toLowerCase().includes(query.toLowerCase())
+      ).slice((page - 1) * 10, page * 10);
+    },
     getAllCachedPages() {
       return Object.values(this.pages).flat(); // Combine all cached data into a single array
     },

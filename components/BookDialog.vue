@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 interface EditedRow {
+  id?: number;
   title?: string;
   author?: string;
   genre?: string;
   year?: number;
   coverImage?: string | null;
+  isFavorite?: boolean;
 }
 
 const props = defineProps<{
@@ -14,82 +16,130 @@ const props = defineProps<{
   editedRow: EditedRow | null;
 }>();
 
-const emit = defineEmits(['update:isOpen', 'update:editedRow', 'submit']);
+const emit = defineEmits(['update:isOpen', 'update:editedRow', 'submitEdit', 'submitAdd']);
 
+const localEditedRow = ref<EditedRow>({});
 const coverImagePreview = ref<string | null>(null);
 
+// Watch for changes in the editedRow prop to keep localEditedRow in sync
+watch(
+  () => props.editedRow,
+  (newRow) => {
+    if (newRow) {
+      localEditedRow.value = { ...newRow };
+      coverImagePreview.value = newRow.coverImage ?? null;
+    } else {
+      localEditedRow.value = {};
+      coverImagePreview.value = null;
+    }
+  },
+  { immediate: true }
+);
+
+// Handle file input with size check
 const handleCoverImageChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
   if (file) {
+    const maxSizeInBytes = 1  * 1024; // 1 MB
+
+    if (file.size > maxSizeInBytes) {
+      alert('The image size should be less than 1 MB.');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result;
       if (typeof result === 'string') {
         coverImagePreview.value = result;
-        emit('update:editedRow', { ...(props.editedRow ?? {}), coverImage: result });
+        localEditedRow.value.coverImage = result;
       }
     };
     reader.readAsDataURL(file);
   }
 };
-</script>
 
+const closeDialog = () => {
+  emit('update:isOpen', false);
+};
+
+const submitForm = () => {
+  if (localEditedRow.value.id) {
+    emit('submitEdit', { ...localEditedRow.value }); // Emit event for edit
+  } else {
+    emit('submitAdd', { ...localEditedRow.value }); // Emit event for add
+  }
+  closeDialog();
+};
+</script>
 <template>
-  <!-- Use v-bind and v-on for props and their events -->
   <UModal :model-value="isOpen" @update:model-value="$emit('update:isOpen', $event)">
     <div class="p-4">
-      <form @submit.prevent="$emit('submit', editedRow)">
+      <h3 class="text-lg font-semibold mb-4">
+        {{ localEditedRow.id ? 'Edit Book' : 'Add New Book' }}
+      </h3>
+      <form @submit.prevent="submitForm">
         <div class="mb-4">
-          <label>Title</label>
+          <label for="title" class="block text-sm font-medium">Title</label>
           <UInput
-            :value="editedRow?.title"
-            @input="$emit('update:editedRow', { ...editedRow, title: $event })"
+            id="title"
+            v-model="localEditedRow.title"
             placeholder="Title"
             required
             maxlength="20"
           />
         </div>
         <div class="mb-4">
-          <label>Author</label>
+          <label for="author" class="block text-sm font-medium">Author</label>
           <UInput
-            :value="editedRow?.author"
-            @input="$emit('update:editedRow', { ...editedRow, author: $event })"
+            id="author"
+            v-model="localEditedRow.author"
             placeholder="Author"
             required
           />
         </div>
         <div class="mb-4">
-          <label>Genre</label>
+          <label for="genre" class="block text-sm font-medium">Genre</label>
           <USelect
-            :value="editedRow?.genre"
-            @change="$emit('update:editedRow', { ...editedRow, genre: $event })"
-            :options="['Fiction', 'Non-Fiction']"
+            id="genre"
+            v-model="localEditedRow.genre"
+            :options="['Male', 'Female']"
             required
           />
         </div>
         <div class="mb-4">
-          <label>Year</label>
+          <label for="year" class="block text-sm font-medium">Year</label>
           <UInput
+            id="year"
             type="number"
-            :value="editedRow?.year"
-            @input="$emit('update:editedRow', { ...editedRow, year: Number($event) })"
+            v-model="localEditedRow.year"
             placeholder="Year"
             required
           />
         </div>
         <div class="mb-4">
-          <label>Image</label>
-          <input type="file" @change="handleCoverImageChange" />
-          <img
-            :src="coverImagePreview || (editedRow?.coverImage ?? undefined)"
-            alt="Preview"
-            class="h-16 w-16"
+          <label for="isFavorite" class="block text-sm font-medium">Favorite</label>
+          <UCheckbox
+            id="isFavorite"
+            v-model="localEditedRow.isFavorite"
+            label="Mark as Favorite"
           />
         </div>
+        <div class="mb-4">
+          <label for="coverImage" class="block text-sm font-medium">Cover Image</label>
+          <input id="coverImage" type="file" @change="handleCoverImageChange" />
+          <div class="mt-2">
+            <img
+              :src="coverImagePreview || localEditedRow.coverImage"
+              alt="Preview"
+              class="h-16 w-16 object-cover rounded"
+            />
+          </div>
+        </div>
         <div class="flex justify-end">
-          <UButton @click="$emit('update:isOpen', false)">Cancel</UButton>
+          <UButton @click="closeDialog" type="button">Cancel</UButton>
           <UButton type="submit" color="blue">Save</UButton>
         </div>
       </form>
@@ -97,6 +147,18 @@ const handleCoverImageChange = (event: Event) => {
   </UModal>
 </template>
 
+
 <style scoped>
-/* Add modal styles */
+.h-16 {
+  height: 4rem;
+}
+.w-16 {
+  width: 4rem;
+}
+.object-cover {
+  object-fit: cover;
+}
+.rounded {
+  border-radius: 0.375rem;
+}
 </style>
