@@ -21,7 +21,6 @@ const emit = defineEmits(['update:isOpen', 'update:editedRow', 'submitEdit', 'su
 const localEditedRow = ref<EditedRow>({});
 const coverImagePreview = ref<string | null>(null);
 
-// Watch for changes in the editedRow prop to keep localEditedRow in sync
 watch(
   () => props.editedRow,
   (newRow) => {
@@ -36,14 +35,12 @@ watch(
   { immediate: true }
 );
 
-// Handle file input with size check
 const handleCoverImageChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
   if (file) {
-    const maxSizeInBytes = 1  * 1024; // 1 MB
-
+    const maxSizeInBytes = 1  * 1024 * 1024; // 1 MB
     if (file.size > maxSizeInBytes) {
       alert('The image size should be less than 1 MB.');
       return;
@@ -67,9 +64,9 @@ const closeDialog = () => {
 
 const submitForm = () => {
   if (localEditedRow.value.id) {
-    emit('submitEdit', { ...localEditedRow.value }); // Emit event for edit
+    emit('submitEdit', { ...localEditedRow.value });
   } else {
-    emit('submitAdd', { ...localEditedRow.value }); // Emit event for add
+    emit('submitAdd', { ...localEditedRow.value });
   }
   closeDialog();
 };

@@ -10,34 +10,31 @@ import BookDialog from './BookDialog.vue';
 // Initialize the store
 const booksStore = useBooksStore();
 
-// Initialize route and router for URL state management
 const route = useRoute();
 const router = useRouter();
 
-// States
-const q = ref(route.query.q || ''); // Search query, initialized from URL
-const page = ref(Number(route.query.page) || 1); // Current page, initialized from URL
-const pageSize = ref(10); // Number of items per page
-const sortKey = ref<string | undefined>(undefined); // Sorting column
-const sortDirection = ref<'asc' | 'desc'>('asc'); // Sorting direction
-const isEditDialogOpen = ref(false); // Dialog state
-const editedRow = ref<any | null>(null); // Data being edited
+const q = ref(route.query.q || ''); 
+const page = ref(Number(route.query.page) || 1); 
+const pageSize = ref(10); 
+const sortKey = ref<string | undefined>(undefined); 
+const sortDirection = ref<'asc' | 'desc'>('asc'); 
+const isEditDialogOpen = ref(false); 
+const editedRow = ref<any | null>(null); 
 
-// Computed Properties
+// Computed values for pagination and total books
 const totalPages = computed(() => booksStore.totalPages);
 const totalBooks = computed(() => booksStore.totalBooks);
 const paginatedRows = computed(() => booksStore.getFilteredBooks(page.value, q.value));
 
-// Fetch Books with Search and Pagination
 const fetchBooks = async () => {
   await booksStore.fetchBooks(page.value, pageSize.value, q.value);
 };
 
-// Watchers for Search and Pagination
+// Watch for changes in query or page, and fetch data accordingly
 watch(
   [q, page],
   async () => {
-    router.push({ query: { q: q.value, page: String(page.value) } }); // Sync URL with state
+    router.push({ query: { q: q.value, page: String(page.value) } });
     await fetchBooks();
   },
   { immediate: true }
@@ -53,7 +50,6 @@ watch(
   { immediate: true }
 );
 
-// Open Dialogs
 const openEditDialog = (row: any) => {
   editedRow.value = { ...row };
   isEditDialogOpen.value = true;
@@ -71,7 +67,6 @@ const openAddBookDialog = () => {
   isEditDialogOpen.value = true;
 };
 
-// Submit Functions
 const submitEdit = async (updatedRow: any) => {
   await booksStore.updateBook(updatedRow.id, updatedRow);
   isEditDialogOpen.value = false;
@@ -84,7 +79,6 @@ const submitAdd = async (newBook: any) => {
   await fetchBooks();
 };
 
-// Row Actions
 const deleteRow = async (row: any) => {
   await booksStore.deleteMyBook(row.id);
   await fetchBooks();
@@ -94,7 +88,6 @@ const toggleFavorite = async (bookId: number) => {
   await booksStore.toggleFavorite(bookId);
 };
 
-// Sorting
 const toggleSort = (key: string) => {
   if (sortKey.value === key) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -104,7 +97,6 @@ const toggleSort = (key: string) => {
   }
 };
 
-// Initial Data Fetch
 onMounted(fetchBooks);
 </script>
 

@@ -1,9 +1,9 @@
 export const useBooksStore = defineStore('books', {
   state: () => ({
-    pages: {} as Record<number, Array<any>>, // Cache for each page's data
-    totalPages: 1, // Total number of pages from API response
-    totalBooks: 0, // Total number of books from API response
-    currentPage: 1, // Track the current page
+    pages: {} as Record<number, Array<any>>, 
+    totalPages: 1, 
+    totalBooks: 0, 
+    currentPage: 1,
     loading: false,
     error: null as string | null,
     apiServer:"http://localhost:3005/api/"

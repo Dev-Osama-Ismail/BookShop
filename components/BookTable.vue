@@ -66,11 +66,9 @@ const emit = defineEmits(['editRow', 'deleteRow', 'sort', 'toggleFavorite']);
           </template>
         </td>
         <td class="px-4 py-2" >
-          <!-- Edit Button -->
           <button @click="$emit('editRow', row)">
             <i class="pi pi-pencil" style="font-size: 1.5rem; color: blue;"></i>
           </button>
-          <!-- Delete Button -->
           <button @click="$emit('deleteRow', row)">
             <i class="pi pi-trash" style="font-size: 1.5rem; color: red;"></i>
           </button>

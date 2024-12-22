@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <BooksTableT/> -->
     <Books/> 
   </div>
 </template>
